@@ -1,5 +1,5 @@
 network_volume:
-    base_path: /workspace/ComfyUI/
+    base_path: /runpod-volume/ComfyUI/
     checkpoints: models/checkpoints/
     clip: models/clip/
     vae: models/vae/
