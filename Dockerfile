@@ -1,5 +1,8 @@
 FROM runpod/worker-comfyui:5.3.0-base
 
+# Update ComfyUI to latest version (required for Z-Image/Lumina2 support)
+RUN cd /comfyui && git pull && pip install -r requirements.txt
+
 # Configure ComfyUI Manager security level
 RUN mkdir -p /comfyui/user/__manager
 RUN echo "[default]\nsecurity_level = weak" > /comfyui/user/__manager/config.ini
