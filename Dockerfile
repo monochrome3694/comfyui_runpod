@@ -1,5 +1,9 @@
 FROM runpod/worker-comfyui:5.3.0-base
 
+# Configure ComfyUI Manager security level
+RUN mkdir -p /comfyui/user/__manager
+RUN echo "[default]\nsecurity_level = weak" > /comfyui/user/__manager/config.ini
+
 # Install custom nodes
 RUN comfy-node-install https://github.com/chengzeyi/Comfy-WaveSpeed
 RUN comfy-node-install https://github.com/laksjdjf/Batch-Condition-ComfyUI
