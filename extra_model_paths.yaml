@@ -1,0 +1,7 @@
+network_volume:
+    base_path: /workspace/ComfyUI/
+    checkpoints: models/checkpoints/
+    clip: models/clip/
+    vae: models/vae/
+    diffusion_models: models/diffusion_models/
+    ultralytics: models/ultralytics/
