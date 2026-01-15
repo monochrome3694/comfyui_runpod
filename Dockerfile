@@ -1,4 +1,4 @@
-FROM runpod/worker-comfyui:5.3.0-base
+FROM runpod/worker-comfyui:5.6.0-base
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
