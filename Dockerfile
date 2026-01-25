@@ -28,6 +28,6 @@ RUN sed -i '2a mkdir -p /runpod-volume/ComfyUI/custom_nodes/llm_party_lite && cp
 # Point to Network Volume models
 ADD extra_model_paths.yaml /comfyui/extra_model_paths.yaml
 
-# GPU optimization + high VRAM
+# GPU optimization + low VRAM
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --highvram|g' /start.sh
+RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --lowvram|g' /start.sh
