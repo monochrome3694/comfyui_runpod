@@ -3,6 +3,13 @@ import numpy as np
 from PIL import Image
 from openai import OpenAI, AzureOpenAI
 
+# Wildcard type for any output
+class AnyType(str):
+    def __ne__(self, __value: object) -> bool:
+        return False
+
+any_type = AnyType("*")
+
 class Chat:
     def __init__(self, model_name, apikey, baseurl):
         self.model_name = model_name
@@ -101,14 +108,53 @@ class LLM:
         return (response, json.dumps(history, ensure_ascii=False))
 
 
+class json_get_value:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "text": ("STRING", {"forceInput": True}),
+                "key": ("STRING", {}),
+                "is_enable": ("BOOLEAN", {"default": True}),
+            }
+        }
+    RETURN_TYPES = (any_type,)
+    RETURN_NAMES = ("any",)
+    FUNCTION = "get_value"
+    CATEGORY = "llm_party_lite"
+
+    def get_value(self, text, key=None, is_enable=True):
+        if is_enable == False:
+            return (None,)
+        try:
+            data = json.loads(text)
+            try:
+                if isinstance(data, dict):
+                    out = data[key]
+                elif isinstance(data, list):
+                    out = data[int(key)]
+            except (KeyError, IndexError, ValueError):
+                return (None,)
+            if isinstance(out, list) or isinstance(out, dict):
+                out = json.dumps(out, ensure_ascii=False, indent=4)
+                return (out.strip(),)
+            else:
+                return (out,)
+        except json.JSONDecodeError:
+            print("Invalid JSON format.")
+            return (None,)
+
+
 NODE_CLASS_MAPPINGS = {
     "get_string": get_string,
     "LLM_api_loader": LLM_api_loader,
-    "LLM": LLM
+    "LLM": LLM,
+    "json_get_value": json_get_value,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "get_string": "Input String",
     "LLM_api_loader": "API LLM Loader",
-    "LLM": "API LLM General Link"
+    "LLM": "API LLM General Link",
+    "json_get_value": "JSON Get Value",
 }
