@@ -1,4 +1,4 @@
-import os, json, base64, io, re, datetime, random
+import os, json, base64, io, re, datetime, random, ast
 import numpy as np
 from PIL import Image
 from openai import OpenAI, AzureOpenAI
@@ -159,11 +159,79 @@ class json_get_value:
             return (None,)
 
 
+class json_extractor:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "input": ("STRING", {"forceInput": True}),
+                "is_enable": ("BOOLEAN", {"default": True}),
+            }
+        }
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("json_output",)
+    FUNCTION = "json_extract"
+    CATEGORY = "llm_party_lite"
+    
+    def json_extract(self, input, is_enable=True):
+        if not is_enable:
+            return (None,)
+        
+        # Try parsing directly first
+        try:
+            result = json.loads(input)
+            return (json.dumps(result, ensure_ascii=False, indent=4),)
+        except json.JSONDecodeError:
+            pass
+        
+        # Try to extract JSON from text
+        _pattern = r"\{(.*)\}"
+        _match = re.search(_pattern, input, re.DOTALL)
+        if _match:
+            input = "{" + _match.group(1) + "}"
+        
+        # Clean up json string
+        input = (
+            input.replace("{{", "{")
+            .replace("}}", "}")
+            .replace('"[{', "[{")
+            .replace('}]"', "}]")
+            .replace("\\n", " ")
+            .replace("\n", " ")
+            .replace("\r", "")
+            .strip()
+        )
+        
+        # Remove JSON Markdown Frame
+        if input.startswith("```json"):
+            input = input[len("```json"):]
+        if input.startswith("```"):
+            input = input[len("```"):]
+        if input.endswith("```"):
+            input = input[:-3]
+        input = input.strip()
+        
+        try:
+            result = json.loads(input)
+            return (json.dumps(result, ensure_ascii=False, indent=4),)
+        except json.JSONDecodeError:
+            # Try ast.literal_eval as fallback
+            try:
+                result = ast.literal_eval(input)
+                if isinstance(result, (dict, list)):
+                    return (json.dumps(result, ensure_ascii=False, indent=4),)
+            except:
+                pass
+            print(f"Error parsing JSON: {input[:100]}...")
+            return ("error loading json",)
+
+
 NODE_CLASS_MAPPINGS = {
     "get_string": get_string,
     "LLM_api_loader": LLM_api_loader,
     "LLM": LLM,
     "json_get_value": json_get_value,
+    "json_extractor": json_extractor,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -171,4 +239,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LLM_api_loader": "☁️API LLM Loader",
     "LLM": "☁️API LLM general link",
     "json_get_value": "JSON Get Value",
+    "json_extractor": "JSON Extractor",
 }
