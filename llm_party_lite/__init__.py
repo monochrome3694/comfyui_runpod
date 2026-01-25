@@ -60,20 +60,24 @@ class LLM_api_loader:
             "required": {"model_name": ("STRING", {"default": "gpt-4o-mini"})},
             "optional": {
                 "base_url": ("STRING", {"default": "https://api.openai.com/v1"}),
-                "api_key": ("STRING", {"default": ""})
+                "api_key": ("STRING", {"default": ""}),
+                "is_ollama": ("BOOLEAN", {"default": False}),
             }
         }
     RETURN_TYPES = ("CUSTOM",)
     RETURN_NAMES = ("model",)
     FUNCTION = "load"
     CATEGORY = "llm_party_lite"
-    def load(self, model_name, base_url="https://api.openai.com/v1", api_key=""):
+    def load(self, model_name, base_url="https://api.openai.com/v1", api_key="", is_ollama=False):
+        if is_ollama:
+            return (Chat(model_name, "ollama", "http://127.0.0.1:11434/v1/"),)
         return (Chat(model_name, api_key, base_url),)
 
 
 class LLM:
     def __init__(self):
         self.id = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(0, 999999))
+    
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -82,21 +86,38 @@ class LLM:
                 "user_prompt": ("STRING", {"multiline": True, "default": "Hello"}),
                 "model": ("CUSTOM",),
                 "temperature": ("FLOAT", {"default": 0.7, "min": 0.0, "max": 2.0, "step": 0.1}),
-                "max_length": ("INT", {"default": 1920, "min": 256, "max": 128000, "step": 128})
+                "is_memory": (["enable", "disable"], {"default": "enable"}),
+                "is_tools_in_sys_prompt": (["enable", "disable"], {"default": "disable"}),
+                "is_locked": (["enable", "disable"], {"default": "disable"}),
+                "main_brain": (["enable", "disable"], {"default": "enable"}),
+                "max_length": ("INT", {"default": 1920, "min": 256, "max": 128000, "step": 128}),
             },
             "optional": {
                 "system_prompt_input": ("STRING", {"forceInput": True}),
                 "user_prompt_input": ("STRING", {"forceInput": True}),
-                "images": ("IMAGE",)
+                "images": ("IMAGE",),
+                "imgbb_api_key": ("STRING", {"default": ""}),
+                "conversation_rounds": ("INT", {"default": 100, "min": 1, "max": 1000}),
+                "historical_record": ("STRING", {"default": ""}),
+                "is_enable": ("BOOLEAN", {"default": True}),
+                "stream": ("BOOLEAN", {"default": False}),
             }
         }
     RETURN_TYPES = ("STRING", "STRING",)
     RETURN_NAMES = ("response", "history",)
     FUNCTION = "run"
     CATEGORY = "llm_party_lite"
-    def run(self, system_prompt, user_prompt, model, temperature, max_length, system_prompt_input=None, user_prompt_input=None, images=None):
-        if system_prompt_input: system_prompt = system_prompt_input
-        if user_prompt_input: user_prompt = user_prompt_input
+    
+    def run(self, system_prompt, user_prompt, model, temperature, is_memory, is_tools_in_sys_prompt, 
+            is_locked, main_brain, max_length, system_prompt_input=None, user_prompt_input=None, 
+            images=None, imgbb_api_key="", conversation_rounds=100, historical_record="", 
+            is_enable=True, stream=False):
+        if not is_enable:
+            return ("", "")
+        if system_prompt_input:
+            system_prompt = system_prompt_input
+        if user_prompt_input:
+            user_prompt = user_prompt_input
         history = [{"role": "system", "content": system_prompt}]
         response, history, _ = model.send(user_prompt=user_prompt, temperature=temperature, max_length=max_length, history=history, images=images)
         return (response, json.dumps(history, ensure_ascii=False))
@@ -147,7 +168,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "get_string": "Input String",
-    "LLM_api_loader": "API LLM Loader",
-    "LLM": "API LLM General Link",
+    "LLM_api_loader": "☁️API LLM Loader",
+    "LLM": "☁️API LLM general link",
     "json_get_value": "JSON Get Value",
 }
