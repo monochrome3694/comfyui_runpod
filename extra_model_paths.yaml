@@ -5,12 +5,3 @@ network_volume:
     vae: models/vae/
     diffusion_models: models/diffusion_models/
     ultralytics: models/ultralytics/
-```
-
----
-
-Your repo should look like:
-```
-your-repo/
-├── Dockerfile
-└── extra_model_paths.yaml
