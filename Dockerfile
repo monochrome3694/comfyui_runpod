@@ -19,7 +19,9 @@ ADD llm_party_lite /opt/llm_party_lite
 # Symlink custom_nodes from network volume
 RUN rm -rf /comfyui/custom_nodes && \
     ln -sf /runpod-volume/ComfyUI/custom_nodes /comfyui/custom_nodes
-
+RUN mkdir -p /comfyui/models/ultralytics && \
+    ln -sf /runpod-volume/ComfyUI/models/ultralytics/bbox /comfyui/models/ultralytics/bbox && \
+    ln -sf /runpod-volume/ComfyUI/models/ultralytics/segm /comfyui/models/ultralytics/segm
 # Copy llm_party_lite to network volume at startup (before ComfyUI starts)
 RUN sed -i '2a mkdir -p /runpod-volume/ComfyUI/custom_nodes/llm_party_lite && cp -r /opt/llm_party_lite/* /runpod-volume/ComfyUI/custom_nodes/llm_party_lite/' /start.sh
 
