@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 from openai import OpenAI, AzureOpenAI
 
-# Wildcard type for any output
+# For any_type return
 class AnyType(str):
     def __ne__(self, __value: object) -> bool:
         return False
@@ -49,7 +49,6 @@ class get_string:
     RETURN_NAMES = ("string",)
     FUNCTION = "run"
     CATEGORY = "llm_party_lite"
-
     def run(self, input_string):
         return (input_string,)
 
@@ -68,7 +67,6 @@ class LLM_api_loader:
     RETURN_NAMES = ("model",)
     FUNCTION = "load"
     CATEGORY = "llm_party_lite"
-
     def load(self, model_name, base_url="https://api.openai.com/v1", api_key=""):
         return (Chat(model_name, api_key, base_url),)
 
@@ -76,7 +74,6 @@ class LLM_api_loader:
 class LLM:
     def __init__(self):
         self.id = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(0, 999999))
-
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -97,12 +94,9 @@ class LLM:
     RETURN_NAMES = ("response", "history",)
     FUNCTION = "run"
     CATEGORY = "llm_party_lite"
-
     def run(self, system_prompt, user_prompt, model, temperature, max_length, system_prompt_input=None, user_prompt_input=None, images=None):
-        if system_prompt_input:
-            system_prompt = system_prompt_input
-        if user_prompt_input:
-            user_prompt = user_prompt_input
+        if system_prompt_input: system_prompt = system_prompt_input
+        if user_prompt_input: user_prompt = user_prompt_input
         history = [{"role": "system", "content": system_prompt}]
         response, history, _ = model.send(user_prompt=user_prompt, temperature=temperature, max_length=max_length, history=history, images=images)
         return (response, json.dumps(history, ensure_ascii=False))
@@ -122,7 +116,6 @@ class json_get_value:
     RETURN_NAMES = ("any",)
     FUNCTION = "get_value"
     CATEGORY = "llm_party_lite"
-
     def get_value(self, text, key=None, is_enable=True):
         if is_enable == False:
             return (None,)
