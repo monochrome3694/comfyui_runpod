@@ -11,16 +11,17 @@ RUN pip install --no-cache-dir \
     piexif \
     segment-anything \
     openai \
-    aisuite \
-    beautifulsoup4 \
-    protobuf \
-    grpcio \
-    transformers \
     && rm -rf ~/.cache/pip /tmp/*
+
+# Add llm_party_lite to staging location
+ADD llm_party_lite /opt/llm_party_lite
 
 # Symlink custom_nodes from network volume
 RUN rm -rf /comfyui/custom_nodes && \
     ln -sf /runpod-volume/ComfyUI/custom_nodes /comfyui/custom_nodes
+
+# Copy llm_party_lite to network volume at startup (before ComfyUI starts)
+RUN sed -i '2a mkdir -p /runpod-volume/ComfyUI/custom_nodes/llm_party_lite && cp -r /opt/llm_party_lite/* /runpod-volume/ComfyUI/custom_nodes/llm_party_lite/' /start.sh
 
 # Point to Network Volume models
 ADD extra_model_paths.yaml /comfyui/extra_model_paths.yaml
