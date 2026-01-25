@@ -1,21 +1,68 @@
 FROM runpod/worker-comfyui:5.7.1-base
 
-# Install pip dependencies for custom nodes on network volume
+# Install pip dependencies for custom nodes
 RUN pip install --no-cache-dir \
+    # Core/shared
     ultralytics \
     opencv-python-headless \
     scikit-learn \
     scikit-image \
-    onnxruntime-gpu \
+    scipy \
+    matplotlib \
+    pandas \
+    numpy \
+    Pillow \
+    # Impact Pack
+    segment-anything \
+    dill \
+    piexif \
+    # Easy-Use
+    diffusers \
+    accelerate \
+    lark \
+    sentencepiece \
+    spandrel \
+    peft \
+    # Essentials
+    numba \
+    colour-science \
+    rembg \
+    # Manager
+    GitPython \
+    typer \
+    rich \
+    toml \
+    chardet \
+    # LLM_party core
+    beautifulsoup4 \
     langchain \
     langchain-community \
     langchain-openai \
+    langchain-text-splitters \
     openai \
     anthropic \
     transformers \
     sentence-transformers \
-    piexif \
-    aisuite
+    tiktoken \
+    faiss-cpu \
+    openpyxl \
+    xlrd \
+    docx2txt \
+    pdfplumber \
+    websocket-client \
+    pytz \
+    requests \
+    httpx \
+    tenacity \
+    tabulate \
+    markdown \
+    markdownify \
+    html5lib \
+    json-repair \
+    aisuite \
+    timm \
+    optimum \
+    && rm -rf ~/.cache/pip /tmp/*
 
 # Symlink custom_nodes from network volume
 RUN rm -rf /comfyui/custom_nodes && \
@@ -27,5 +74,5 @@ ADD extra_model_paths.yaml /comfyui/extra_model_paths.yaml
 # GPU optimization
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-# Use high VRAM mode for 24GB GPUs (4090/5090)
-ENV COMFYUI_FLAGS="--highvram"
+# Patch start.sh to add --highvram flag
+RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --highvram|g' /start.sh
