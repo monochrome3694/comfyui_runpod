@@ -1,12 +1,27 @@
-FROM runpod/worker-comfyui:5.6.0-base
+FROM runpod/worker-comfyui:5.7.1-base
 
-# Install custom nodes
-RUN comfy-node-install https://github.com/chengzeyi/Comfy-WaveSpeed
-RUN comfy-node-install https://github.com/laksjdjf/Batch-Condition-ComfyUI
-RUN comfy-node-install https://github.com/shadowcz007/comfyui-ultralytics-yolo
-RUN comfy-node-install https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch
-RUN comfy-node-install https://github.com/yolain/ComfyUI-Easy-Use
-RUN comfy-node-install https://github.com/pythongosssss/ComfyUI-Custom-Scripts
+# Install pip dependencies for custom nodes on network volume
+RUN pip install --no-cache-dir \
+    ultralytics \
+    opencv-python-headless \
+    scikit-learn \
+    scikit-image \
+    onnxruntime-gpu \
+    langchain \
+    langchain-community \
+    langchain-openai \
+    openai \
+    anthropic \
+    transformers \
+    sentence-transformers \
+    piexif
+
+# Symlink custom_nodes from network volume
+RUN rm -rf /comfyui/custom_nodes && \
+    ln -sf /runpod-volume/ComfyUI/custom_nodes /comfyui/custom_nodes
 
 # Point to Network Volume models
 ADD extra_model_paths.yaml /comfyui/extra_model_paths.yaml
+
+# GPU optimization
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
