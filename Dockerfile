@@ -30,4 +30,4 @@ ADD extra_model_paths.yaml /comfyui/extra_model_paths.yaml
 
 # GPU optimization + low VRAM
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --lowvram|g' /start.sh
+RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --normalvram|g' /start.sh
