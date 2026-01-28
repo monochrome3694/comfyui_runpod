@@ -17,9 +17,8 @@ RUN pip install --no-cache-dir \
 # ============================================
 
 # Embed PersonaStyle checkpoint from Civitai (6.5GB)
-RUN curl -L -H "Authorization: Bearer d250e4ca5d542a73d2d8d74727679ddc" \
-    -o /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
-    "https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16"
+RUN wget -O /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
+    "https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d250e4ca5d542a73d2d8d74727679ddc"
 
 # ============================================
 # CUSTOM NODES SETUP
