@@ -18,9 +18,8 @@ RUN pip install --no-cache-dir \
 # ============================================
 
 # Embed PersonaStyle checkpoint from Civitai (6.5GB)
-RUN wget --header="Authorization: Bearer d250e4ca5d542a73d2d8d74727679ddc" \
-    -q --show-progress \
-    -O /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
+RUN curl -L -H "Authorization: Bearer d250e4ca5d542a73d2d8d74727679ddc" \
+    -o /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
     "https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16"
 
 # ============================================
@@ -41,7 +40,7 @@ RUN mkdir -p /comfyui/models/ultralytics && \
 # Copy llm_party_lite to network volume at startup
 RUN sed -i '2a mkdir -p /runpod-volume/ComfyUI/custom_nodes/llm_party_lite && cp -r /opt/llm_party_lite/* /runpod-volume/ComfyUI/custom_nodes/llm_party_lite/' /start.sh
 
-# Point to Network Volume models (for additional models not embedded)
+# Point to Network Volume models
 ADD extra_model_paths.yaml /comfyui/extra_model_paths.yaml
 
 # GPU optimization + low VRAM
