@@ -9,7 +9,6 @@ RUN pip install --no-cache-dir \
     scipy \
     dill \
     piexif \
-    segment-anything \
     openai \
     && rm -rf ~/.cache/pip /tmp/*
 
