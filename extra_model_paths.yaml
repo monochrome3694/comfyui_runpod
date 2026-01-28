@@ -1,3 +1,15 @@
+# Embedded models (baked into Docker image - faster cold starts)
+embedded:
+    base_path: /comfyui/models/
+    checkpoints: checkpoints/
+    clip: clip/
+    text_encoders: text_encoders/
+    vae: vae/
+    diffusion_models: diffusion_models/
+    loras: loras/
+    ultralytics: ultralytics/
+
+# Network volume models (larger/experimental models, easy to swap)
 network_volume:
     base_path: /runpod-volume/ComfyUI/
     checkpoints: models/checkpoints/
@@ -5,4 +17,5 @@ network_volume:
     text_encoders: models/text_encoders/
     vae: models/vae/
     diffusion_models: models/diffusion_models/
+    loras: models/loras/
     ultralytics: models/ultralytics/
