@@ -123,8 +123,8 @@ RUN rm -rf /comfyui/custom_nodes/* && \
     git clone https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch && \
     git clone https://github.com/tusharbhutt/Endless-Nodes.git && \
     git clone https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use && \
-    git clone https://github.com/StartHua/Comfyui-image-compressor.git ComfyUI-Image-Compressor && \
-    git clone https://github.com/yolanother/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI && \
+    git clone https://github.com/liuqianhonga/ComfyUI-Image-Compressor.git ComfyUI-Image-Compressor && \
+    git clone https://github.com/laksjdjf/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI && \
     git clone https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG && \
     git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git && \
     git clone https://github.com/kijai/ComfyUI-Florence2.git
