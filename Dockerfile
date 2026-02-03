@@ -127,7 +127,8 @@ RUN rm -rf /comfyui/custom_nodes/* && \
     git clone https://github.com/laksjdjf/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI && \
     git clone https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG && \
     git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git && \
-    git clone https://github.com/kijai/ComfyUI-Florence2.git
+    git clone https://github.com/kijai/ComfyUI-Florence2.git && \
+    git clone https://github.com/chengzeyi/Comfy-WaveSpeed.git
 
 # Add llm_party_lite
 ADD llm_party_lite /comfyui/custom_nodes/llm_party_lite
