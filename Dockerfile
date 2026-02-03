@@ -36,6 +36,7 @@ RUN pip install --no-cache-dir \
     pyyaml \
     omegaconf \
     aiohttp \
+    huggingface_hub \
     && rm -rf ~/.cache/pip /tmp/*
 
 # ============================================
@@ -48,7 +49,8 @@ RUN mkdir -p /comfyui/models/diffusion_models \
     /comfyui/models/checkpoints \
     /comfyui/models/loras \
     /comfyui/models/ultralytics/bbox \
-    /comfyui/models/ultralytics/segm
+    /comfyui/models/ultralytics/segm \
+    /comfyui/models/LLM/Florence-2-large-PromptGen-v2.0
 
 # ============================================
 # ALL MODELS (parallel download with aria2c)
@@ -79,46 +81,60 @@ RUN printf '%s\n' \
     '  out=/comfyui/models/ultralytics/bbox/face_yolov8m.pt' \
     'https://huggingface.co/Bingsu/adetailer/resolve/main/person_yolov8m-seg.pt' \
     '  out=/comfyui/models/ultralytics/segm/person_yolov8m-seg.pt' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/model.safetensors' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/model.safetensors' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/config.json' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/config.json' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/configuration_florence2.py' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/configuration_florence2.py' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/modeling_florence2.py' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/modeling_florence2.py' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/processing_florence2.py' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/processing_florence2.py' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/preprocessor_config.json' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/preprocessor_config.json' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/generation_config.json' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/generation_config.json' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/tokenizer.json' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/tokenizer.json' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/tokenizer_config.json' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/tokenizer_config.json' \
+    'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/vocab.json' \
+    '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/vocab.json' \
     > /tmp/downloads.txt && \
     aria2c -i /tmp/downloads.txt \
-        -j 6 \
-        -x 4 \
-        -s 4 \
+        -j 10 \
+        -x 16 \
+        -s 16 \
         --file-allocation=none \
         --console-log-level=warn \
-        --summary-interval=10 && \
+        --summary-interval=30 \
+        --connect-timeout=30 \
+        --timeout=600 \
+        --max-tries=3 \
+        --retry-wait=5 && \
     rm /tmp/downloads.txt
 
 # ============================================
-# FLORENCE2 MODEL (uses huggingface-cli)
+# CUSTOM NODES (parallel git clones)
 # ============================================
 
-RUN pip install --no-cache-dir huggingface_hub && \
-    huggingface-cli download MiaoshouAI/Florence-2-large-PromptGen-v2.0 \
-    --local-dir /comfyui/models/LLM/Florence-2-large-PromptGen-v2.0 \
-    --local-dir-use-symlinks False && \
-    rm -rf ~/.cache/huggingface
-
-# ============================================
-# CUSTOM NODES (ALL EMBEDDED)
-# ============================================
-
-RUN rm -rf /comfyui/custom_nodes/* && \
-    cd /comfyui/custom_nodes && \
-    git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git && \
-    git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git && \
-    git clone https://github.com/ltdrdata/ComfyUI-Manager.git && \
-    git clone https://github.com/cubiq/ComfyUI_essentials.git && \
-    git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git comfyui-custom-scripts && \
-    git clone https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch && \
-    git clone https://github.com/tusharbhutt/Endless-Nodes.git && \
-    git clone https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use && \
-    git clone https://github.com/liuqianhonga/ComfyUI-Image-Compressor.git ComfyUI-Image-Compressor && \
-    git clone https://github.com/laksjdjf/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI && \
-    git clone https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG && \
-    git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git && \
-    git clone https://github.com/kijai/ComfyUI-Florence2.git && \
-    git clone https://github.com/chengzeyi/Comfy-WaveSpeed.git
+RUN rm -rf /comfyui/custom_nodes/* && cd /comfyui/custom_nodes && \
+    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack.git & \
+    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git & \
+    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git & \
+    git clone --depth 1 https://github.com/cubiq/ComfyUI_essentials.git & \
+    git clone --depth 1 https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git comfyui-custom-scripts & \
+    git clone --depth 1 https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch & \
+    git clone --depth 1 https://github.com/tusharbhutt/Endless-Nodes.git & \
+    git clone --depth 1 https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use & \
+    git clone --depth 1 https://github.com/liuqianhonga/ComfyUI-Image-Compressor.git ComfyUI-Image-Compressor & \
+    git clone --depth 1 https://github.com/laksjdjf/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI & \
+    git clone --depth 1 https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG & \
+    git clone --depth 1 https://github.com/kijai/ComfyUI-WanVideoWrapper.git & \
+    git clone --depth 1 https://github.com/kijai/ComfyUI-Florence2.git & \
+    git clone --depth 1 https://github.com/chengzeyi/Comfy-WaveSpeed.git & \
+    wait
 
 # Add llm_party_lite
 ADD llm_party_lite /comfyui/custom_nodes/llm_party_lite
