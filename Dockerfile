@@ -46,23 +46,14 @@ RUN pip install --no-cache-dir \
 RUN mkdir -p /comfyui/models/diffusion_models \
     /comfyui/models/text_encoders \
     /comfyui/models/vae \
-    /comfyui/models/checkpoints \
     /comfyui/models/loras \
-    /comfyui/models/ultralytics/bbox \
-    /comfyui/models/ultralytics/segm \
     /comfyui/models/LLM/Florence-2-large-PromptGen-v2.0
 
 # ============================================
-# ALL MODELS (parallel download with aria2c)
+# WAN 2.2 VIDEO MODELS (parallel download)
 # ============================================
 
 RUN printf '%s\n' \
-    'https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors' \
-    '  out=/comfyui/models/diffusion_models/z_image_turbo_bf16.safetensors' \
-    'https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors' \
-    '  out=/comfyui/models/text_encoders/qwen_3_4b.safetensors' \
-    'https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors' \
-    '  out=/comfyui/models/vae/ae.safetensors' \
     'https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors' \
     '  out=/comfyui/models/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors' \
     'https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors' \
@@ -75,12 +66,6 @@ RUN printf '%s\n' \
     '  out=/comfyui/models/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors' \
     'https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors' \
     '  out=/comfyui/models/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors' \
-    'https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d250e4ca5d542a73d2d8d74727679ddc' \
-    '  out=/comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors' \
-    'https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt' \
-    '  out=/comfyui/models/ultralytics/bbox/face_yolov8m.pt' \
-    'https://huggingface.co/Bingsu/adetailer/resolve/main/person_yolov8m-seg.pt' \
-    '  out=/comfyui/models/ultralytics/segm/person_yolov8m-seg.pt' \
     'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/model.safetensors' \
     '  out=/comfyui/models/LLM/Florence-2-large-PromptGen-v2.0/model.safetensors' \
     'https://huggingface.co/MiaoshouAI/Florence-2-large-PromptGen-v2.0/resolve/main/config.json' \
@@ -150,4 +135,4 @@ RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
 
 # GPU optimization
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --normalvram|g' /start.sh
+RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --highvram|g' /start.sh
