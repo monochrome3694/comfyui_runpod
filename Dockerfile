@@ -134,4 +134,4 @@ RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
 
 # GPU optimization
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --highvram|g' /start.sh
+RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --normalvram|g' /start.sh
