@@ -1,6 +1,15 @@
 FROM runpod/worker-comfyui:5.7.1-base
 
 # ============================================
+# UPDATE COMFYUI TO LATEST VERSION
+# ============================================
+
+RUN cd /comfyui && \
+    git pull origin master && \
+    pip install --no-cache-dir -r requirements.txt && \
+    rm -rf ~/.cache/pip /tmp/*
+
+# ============================================
 # SYSTEM DEPENDENCIES
 # ============================================
 
@@ -85,7 +94,7 @@ RUN printf '%s\n' \
 # CUSTOM NODES
 # ============================================
 
-RUN rm -rf /comfyui/custom_nodes/* && cd /comfyui/custom_nodes && \
+RUN cd /comfyui/custom_nodes && \
     git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack.git && \
     git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git && \
     git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git && \
@@ -105,13 +114,12 @@ ADD llm_party_lite /comfyui/custom_nodes/llm_party_lite
 
 # Install all custom node requirements
 RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
-    pip install -q -r "$req" 2>/dev/null || true; \
-    done && rm -rf ~/.cache/pip /tmp/*
+    pip install --no-cache-dir -r "$req" 2>/dev/null || true; \
+    done && rm -rf /tmp/*
 
 # ============================================
 # CONFIGURATION
 # ============================================
 
 # GPU optimization
-ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --normalvram|g' /start.sh
+ENV PYTORCH_ALLOC_CONF=expandable_segments:True
