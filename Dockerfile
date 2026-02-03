@@ -101,25 +101,24 @@ RUN printf '%s\n' \
     rm /tmp/downloads.txt
 
 # ============================================
-# CUSTOM NODES (parallel git clones)
+# CUSTOM NODES
 # ============================================
 
 RUN rm -rf /comfyui/custom_nodes/* && cd /comfyui/custom_nodes && \
-    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack.git & \
-    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git & \
-    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git & \
-    git clone --depth 1 https://github.com/cubiq/ComfyUI_essentials.git & \
-    git clone --depth 1 https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git comfyui-custom-scripts & \
-    git clone --depth 1 https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch & \
-    git clone --depth 1 https://github.com/tusharbhutt/Endless-Nodes.git & \
-    git clone --depth 1 https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use & \
-    git clone --depth 1 https://github.com/liuqianhonga/ComfyUI-Image-Compressor.git ComfyUI-Image-Compressor & \
-    git clone --depth 1 https://github.com/laksjdjf/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI & \
-    git clone --depth 1 https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG & \
-    git clone --depth 1 https://github.com/kijai/ComfyUI-WanVideoWrapper.git & \
-    git clone --depth 1 https://github.com/kijai/ComfyUI-Florence2.git & \
-    git clone --depth 1 https://github.com/chengzeyi/Comfy-WaveSpeed.git & \
-    wait
+    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack.git && \
+    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git && \
+    git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git && \
+    git clone --depth 1 https://github.com/cubiq/ComfyUI_essentials.git && \
+    git clone --depth 1 https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git comfyui-custom-scripts && \
+    git clone --depth 1 https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch && \
+    git clone --depth 1 https://github.com/tusharbhutt/Endless-Nodes.git && \
+    git clone --depth 1 https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use && \
+    git clone --depth 1 https://github.com/liuqianhonga/ComfyUI-Image-Compressor.git ComfyUI-Image-Compressor && \
+    git clone --depth 1 https://github.com/laksjdjf/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI && \
+    git clone --depth 1 https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG && \
+    git clone --depth 1 https://github.com/kijai/ComfyUI-WanVideoWrapper.git && \
+    git clone --depth 1 https://github.com/kijai/ComfyUI-Florence2.git && \
+    git clone --depth 1 https://github.com/chengzeyi/Comfy-WaveSpeed.git
 
 # Add llm_party_lite
 ADD llm_party_lite /comfyui/custom_nodes/llm_party_lite
@@ -135,4 +134,4 @@ RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
 
 # GPU optimization
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --highvram|g' /start.sh
+RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --normalvram|g' /start.sh
