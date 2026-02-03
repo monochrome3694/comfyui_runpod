@@ -121,7 +121,6 @@ RUN rm -rf /comfyui/custom_nodes/* && \
     git clone https://github.com/cubiq/ComfyUI_essentials.git && \
     git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git comfyui-custom-scripts && \
     git clone https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch && \
-    git clone https://github.com/cerebrarium/ComfyUI-Ultralytics-YOLO.git comfyui-ultralytics-yolo && \
     git clone https://github.com/tusharbhutt/Endless-Nodes.git && \
     git clone https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use && \
     git clone https://github.com/StartHua/Comfyui-image-compressor.git ComfyUI-Image-Compressor && \
