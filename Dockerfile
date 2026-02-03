@@ -4,7 +4,7 @@ FROM runpod/worker-comfyui:5.7.1-base
 # SYSTEM DEPENDENCIES
 # ============================================
 
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ffmpeg aria2 && rm -rf /var/lib/apt/lists/*
 
 # ============================================
 # PYTHON DEPENDENCIES
@@ -39,68 +39,70 @@ RUN pip install --no-cache-dir \
     && rm -rf ~/.cache/pip /tmp/*
 
 # ============================================
-# Z-IMAGE MODELS
+# CREATE MODEL DIRECTORIES
 # ============================================
 
+RUN mkdir -p /comfyui/models/diffusion_models \
+    /comfyui/models/text_encoders \
+    /comfyui/models/vae \
+    /comfyui/models/checkpoints \
+    /comfyui/models/loras \
+    /comfyui/models/ultralytics/bbox \
+    /comfyui/models/ultralytics/segm
+
+# ============================================
+# ALL MODELS (parallel download with aria2c)
+# ============================================
+
+RUN echo "\
 # Z-Image Turbo Diffusion Model (12GB)
-RUN wget -O /comfyui/models/diffusion_models/z_image_turbo_bf16.safetensors \
-    "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors"
-
+https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors
+  out=/comfyui/models/diffusion_models/z_image_turbo_bf16.safetensors
 # Qwen 3 4B Text Encoder for Z-Image (7.5GB)
-RUN wget -O /comfyui/models/text_encoders/qwen_3_4b.safetensors \
-    "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors"
-
+https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors
+  out=/comfyui/models/text_encoders/qwen_3_4b.safetensors
 # Z-Image / FLUX VAE (320MB)
-RUN wget -O /comfyui/models/vae/ae.safetensors \
-    "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors"
-
-# ============================================
-# WAN 2.2 MODELS
-# ============================================
-
+https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors
+  out=/comfyui/models/vae/ae.safetensors
 # WAN 2.2 I2V High Noise Diffusion Model (14.3GB)
-RUN wget -O /comfyui/models/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors \
-    "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
-
+https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors
+  out=/comfyui/models/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors
 # WAN 2.2 I2V Low Noise Diffusion Model (14.3GB)
-RUN wget -O /comfyui/models/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors \
-    "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors"
-
+https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors
+  out=/comfyui/models/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors
 # WAN 2.2 Text Encoder - UMT5 XXL (10GB)
-RUN wget -O /comfyui/models/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors \
-    "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors"
-
+https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
+  out=/comfyui/models/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
 # WAN 2.1 VAE (500MB)
-RUN wget -O /comfyui/models/vae/wan_2.1_vae.safetensors \
-    "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors"
-
-# WAN 2.2 LightX2V LoRAs
-RUN mkdir -p /comfyui/models/loras && \
-    wget -O /comfyui/models/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors \
-    "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors" && \
-    wget -O /comfyui/models/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors \
-    "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors"
-
-# ============================================
-# SDXL / ILLUSTRIOUS MODELS
-# ============================================
-
+https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors
+  out=/comfyui/models/vae/wan_2.1_vae.safetensors
+# WAN 2.2 LightX2V LoRA High Noise
+https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors
+  out=/comfyui/models/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors
+# WAN 2.2 LightX2V LoRA Low Noise
+https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors
+  out=/comfyui/models/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors
 # PersonaStyle Checkpoint (6.5GB)
-RUN wget -O /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
-    "https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d250e4ca5d542a73d2d8d74727679ddc"
+https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d250e4ca5d542a73d2d8d74727679ddc
+  out=/comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors
+# Face YOLO Model
+https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt
+  out=/comfyui/models/ultralytics/bbox/face_yolov8m.pt
+# Person Segmentation YOLO Model
+https://huggingface.co/Bingsu/adetailer/resolve/main/person_yolov8m-seg.pt
+  out=/comfyui/models/ultralytics/segm/person_yolov8m-seg.pt
+" > /tmp/downloads.txt && \
+    aria2c -i /tmp/downloads.txt \
+        -j 6 \
+        -x 4 \
+        -s 4 \
+        --file-allocation=none \
+        --console-log-level=warn \
+        --summary-interval=10 && \
+    rm /tmp/downloads.txt
 
 # ============================================
-# ULTRALYTICS MODELS
-# ============================================
-
-RUN mkdir -p /comfyui/models/ultralytics/bbox /comfyui/models/ultralytics/segm && \
-    wget -O /comfyui/models/ultralytics/bbox/face_yolov8m.pt \
-    "https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt" && \
-    wget -O /comfyui/models/ultralytics/segm/person_yolov8m-seg.pt \
-    "https://huggingface.co/Bingsu/adetailer/resolve/main/person_yolov8m-seg.pt"
-
-# ============================================
-# FLORENCE2 MODEL
+# FLORENCE2 MODEL (uses huggingface-cli)
 # ============================================
 
 RUN pip install --no-cache-dir huggingface_hub && \
