@@ -121,5 +121,8 @@ RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
 # CONFIGURATION
 # ============================================
 
+# Custom handler with presigned R2 upload support
+COPY handler.py /handler.py
+
 # GPU optimization
 ENV PYTORCH_ALLOC_CONF=expandable_segments:True
