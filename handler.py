@@ -142,12 +142,17 @@ def poll_for_completion(prompt_id, timeout=POLL_TIMEOUT):
 
 
 def resolve_output_path(item):
-    """Resolve a ComfyUI output item to a filesystem path."""
+    """Resolve a ComfyUI output item to a filesystem path, with traversal protection."""
     filename = item.get("filename")
     if not filename:
         return None
     subfolder = item.get("subfolder", "")
-    path = Path(COMFY_OUTPUT_DIR) / subfolder / filename
+    base = Path(COMFY_OUTPUT_DIR).resolve()
+    path = (base / subfolder / filename).resolve()
+    # Reject paths that escape the output directory
+    if not str(path).startswith(str(base) + "/"):
+        print(f"Path traversal attempt blocked: {path}")
+        return None
     if path.exists():
         return str(path)
     return None
