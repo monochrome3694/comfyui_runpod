@@ -132,6 +132,9 @@ RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
 # CONFIGURATION
 # ============================================
 
+# Custom handler with presigned R2 upload support
+COPY handler.py /handler.py
+
 # GPU optimization
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --normalvram|g' /start.sh
