@@ -96,7 +96,7 @@ RUN printf '%s\n' \
 
 RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
 RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git
+
 RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/cubiq/ComfyUI_essentials.git
 RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git comfyui-custom-scripts
 RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch
