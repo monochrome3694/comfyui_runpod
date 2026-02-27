@@ -126,3 +126,4 @@ COPY handler.py /handler.py
 
 # GPU optimization
 ENV PYTORCH_ALLOC_CONF=expandable_segments:True
+RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --highvram|g' /start.sh
