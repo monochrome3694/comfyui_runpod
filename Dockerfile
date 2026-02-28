@@ -36,27 +36,21 @@ RUN mkdir -p /comfyui/models/checkpoints \
     /comfyui/models/ultralytics/bbox
 
 # ============================================
-# ILLUSTRIOUS MODEL + FACE DETECTION (parallel download)
+# FACE DETECTION MODEL
 # ============================================
 
-RUN printf '%s\n' \
-    'https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d250e4ca5d542a73d2d8d74727679ddc' \
-    '  out=/comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors' \
-    'https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt' \
-    '  out=/comfyui/models/ultralytics/bbox/face_yolov8m.pt' \
-    > /tmp/downloads.txt && \
-    aria2c -i /tmp/downloads.txt \
-        -j 10 \
-        -x 16 \
-        -s 16 \
-        --file-allocation=none \
-        --console-log-level=warn \
-        --summary-interval=30 \
-        --connect-timeout=30 \
-        --timeout=600 \
-        --max-tries=3 \
-        --retry-wait=5 && \
-    rm /tmp/downloads.txt
+RUN aria2c -x 16 -s 16 --file-allocation=none \
+    -o /comfyui/models/ultralytics/bbox/face_yolov8m.pt \
+    'https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt'
+
+# ============================================
+# ILLUSTRIOUS CHECKPOINT (update token if expired)
+# ============================================
+
+RUN aria2c -x 16 -s 16 --file-allocation=none \
+    --connect-timeout=30 --timeout=600 --max-tries=3 --retry-wait=5 \
+    -o /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
+    'https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d544ac1825829086f941063614663856'
 
 # ============================================
 # CUSTOM NODES (only what the workflow needs)
