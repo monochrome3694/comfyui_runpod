@@ -47,9 +47,7 @@ RUN aria2c -x 16 -s 16 --file-allocation=none \
 # ILLUSTRIOUS CHECKPOINT (update token if expired)
 # ============================================
 
-RUN aria2c -x 16 -s 16 --file-allocation=none \
-    --connect-timeout=30 --timeout=600 --max-tries=3 --retry-wait=5 \
-    -o /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
+RUN wget -O /comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors \
     'https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d544ac1825829086f941063614663856'
 
 # ============================================
