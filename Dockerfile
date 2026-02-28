@@ -13,40 +13,7 @@ RUN cd /comfyui && \
 # SYSTEM DEPENDENCIES
 # ============================================
 
-RUN apt-get update && apt-get install -y ffmpeg aria2 && rm -rf /var/lib/apt/lists/*
-
-# ============================================
-# PYTHON DEPENDENCIES
-# ============================================
-
-RUN pip install --no-cache-dir \
-    ultralytics \
-    opencv-python-headless \
-    scikit-learn \
-    scikit-image \
-    scipy \
-    segment-anything \
-    onnxruntime \
-    transformers \
-    accelerate \
-    safetensors \
-    einops \
-    imageio \
-    imageio-ffmpeg \
-    av \
-    kornia \
-    dill \
-    piexif \
-    openai \
-    matplotlib \
-    ftfy \
-    regex \
-    tqdm \
-    pyyaml \
-    omegaconf \
-    aiohttp \
-    huggingface_hub \
-    && rm -rf ~/.cache/pip /tmp/*
+RUN apt-get update && apt-get install -y aria2 && rm -rf /var/lib/apt/lists/*
 
 # ============================================
 # CREATE MODEL DIRECTORIES
@@ -54,13 +21,10 @@ RUN pip install --no-cache-dir \
 
 RUN mkdir -p /comfyui/models/diffusion_models \
     /comfyui/models/text_encoders \
-    /comfyui/models/vae \
-    /comfyui/models/checkpoints \
-    /comfyui/models/ultralytics/bbox \
-    /comfyui/models/ultralytics/segm
+    /comfyui/models/vae
 
 # ============================================
-# Z-IMAGE + ANIME MODELS (parallel download)
+# Z-IMAGE MODELS (parallel download)
 # ============================================
 
 RUN printf '%s\n' \
@@ -70,12 +34,6 @@ RUN printf '%s\n' \
     '  out=/comfyui/models/text_encoders/qwen_3_4b.safetensors' \
     'https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors' \
     '  out=/comfyui/models/vae/ae.safetensors' \
-    'https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d250e4ca5d542a73d2d8d74727679ddc' \
-    '  out=/comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors' \
-    'https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt' \
-    '  out=/comfyui/models/ultralytics/bbox/face_yolov8m.pt' \
-    'https://huggingface.co/Bingsu/adetailer/resolve/main/person_yolov8m-seg.pt' \
-    '  out=/comfyui/models/ultralytics/segm/person_yolov8m-seg.pt' \
     > /tmp/downloads.txt && \
     aria2c -i /tmp/downloads.txt \
         -j 10 \
@@ -91,39 +49,10 @@ RUN printf '%s\n' \
     rm /tmp/downloads.txt
 
 # ============================================
-# CUSTOM NODES (individual layers for caching + rate limit resilience)
-# ============================================
-
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git
-
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/cubiq/ComfyUI_essentials.git
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git comfyui-custom-scripts
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/tusharbhutt/Endless-Nodes.git
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/liuqianhonga/ComfyUI-Image-Compressor.git ComfyUI-Image-Compressor
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/laksjdjf/Batch-Condition-ComfyUI.git Batch-Condition-ComfyUI
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/kijai/ComfyUI-WanVideoWrapper.git
-RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/chengzeyi/Comfy-WaveSpeed.git
-
-
-# Add llm_party_lite
-ADD llm_party_lite /comfyui/custom_nodes/llm_party_lite
-
-# Install all custom node requirements
-RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
-    pip install --no-cache-dir -r "$req" 2>/dev/null || true; \
-    done && rm -rf /tmp/*
-
-# ============================================
 # CONFIGURATION
 # ============================================
 
-# Custom handler with presigned R2 upload support
 COPY handler.py /handler.py
 
-# GPU optimization
 ENV PYTORCH_ALLOC_CONF=expandable_segments:True
 RUN sed -i 's|python -u /comfyui/main.py|python -u /comfyui/main.py --highvram|g' /start.sh
