@@ -16,24 +16,34 @@ RUN cd /comfyui && \
 RUN apt-get update && apt-get install -y aria2 && rm -rf /var/lib/apt/lists/*
 
 # ============================================
+# PYTHON DEPENDENCIES (Impact-Pack requirements)
+# ============================================
+
+RUN pip install --no-cache-dir \
+    ultralytics \
+    opencv-python-headless \
+    scikit-image \
+    scipy \
+    segment-anything \
+    onnxruntime \
+    && rm -rf ~/.cache/pip /tmp/*
+
+# ============================================
 # CREATE MODEL DIRECTORIES
 # ============================================
 
-RUN mkdir -p /comfyui/models/diffusion_models \
-    /comfyui/models/text_encoders \
-    /comfyui/models/vae
+RUN mkdir -p /comfyui/models/checkpoints \
+    /comfyui/models/ultralytics/bbox
 
 # ============================================
-# Z-IMAGE MODELS (parallel download)
+# ILLUSTRIOUS MODEL + FACE DETECTION (parallel download)
 # ============================================
 
 RUN printf '%s\n' \
-    'https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors' \
-    '  out=/comfyui/models/diffusion_models/z_image_turbo_bf16.safetensors' \
-    'https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors' \
-    '  out=/comfyui/models/text_encoders/qwen_3_4b.safetensors' \
-    'https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors' \
-    '  out=/comfyui/models/vae/ae.safetensors' \
+    'https://civitai.com/api/download/models/1421930?type=Model&format=SafeTensor&size=full&fp=fp16&token=d250e4ca5d542a73d2d8d74727679ddc' \
+    '  out=/comfyui/models/checkpoints/personaStyle_Ilxl10Noob.safetensors' \
+    'https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt' \
+    '  out=/comfyui/models/ultralytics/bbox/face_yolov8m.pt' \
     > /tmp/downloads.txt && \
     aria2c -i /tmp/downloads.txt \
         -j 10 \
@@ -47,6 +57,37 @@ RUN printf '%s\n' \
         --max-tries=3 \
         --retry-wait=5 && \
     rm /tmp/downloads.txt
+
+# ============================================
+# CUSTOM NODES (only what the workflow needs)
+# ============================================
+
+# Face detection + inpainting pipeline
+RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
+RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git
+
+# Inpaint crop & stitch
+RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git comfyui-inpaint-cropandstitch
+
+# String manipulation (StringConcatenate, RegexReplace)
+RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/tusharbhutt/Endless-Nodes.git
+
+# String Input node
+RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/yolain/ComfyUI-Easy-Use.git ComfyUI-Easy-Use
+
+# Skimmed CFG
+RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/Extraltodeus/Skimmed_CFG.git Skimmed_CFG
+
+# First Block Cache for speed
+RUN cd /comfyui/custom_nodes && git clone --depth 1 https://github.com/chengzeyi/Comfy-WaveSpeed.git
+
+# JSON parsing (json_extractor, json_get_value)
+ADD llm_party_lite /comfyui/custom_nodes/llm_party_lite
+
+# Install all custom node requirements
+RUN for req in /comfyui/custom_nodes/*/requirements.txt; do \
+    pip install --no-cache-dir -r "$req" 2>/dev/null || true; \
+    done && rm -rf /tmp/*
 
 # ============================================
 # CONFIGURATION
